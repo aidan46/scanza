@@ -1,1 +1,0 @@
-std::result::Result<alloy::alloy_primitives::Uint<256, 4>, error::Error>: std::convert::From<std::result::Result<_, std::string::String>>

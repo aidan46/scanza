@@ -1,1 +1,0 @@
-std::result::Result<std::convert::Infallible, alloy::transports::RpcError<alloy::transports::TransportErrorKind>>
