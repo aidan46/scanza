@@ -23,6 +23,7 @@
           clang
           pkg-config
           taplo
+          just
 
           # Required for macOS TLS / linker success
           darwin.apple_sdk.frameworks.Security
