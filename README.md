@@ -1,64 +1,80 @@
 # Scanza
 
-Scanza is a lightweight Ethereum wallet inspector. It provides a simple API to fetch an account's native ETH balance and token holdings using an Axum-based Rust backend powered by Alloy.
+Scanza is a lightweight Ethereum wallet inspector with a React frontend and an Axum-based Rust backend powered by Alloy.
+It allows you to query a wallet's native ETH balance and token holdings.
 
 ## Features
 
-- 🦀 Built in Rust using [Axum](https://github.com/tokio-rs/axum)
-- ⚙️ Uses [Alloy](https://github.com/alloy-rs/alloy) for Ethereum RPC calls
-- 🔍 Supports:
-  - `/wallet/{address}/balance`: Native ETH balance
-  - `/wallet/{address}/tokens`: ERC-20 token balances (top tokens only)
-  - `/wallet/{address}`: Unified wallet view
-- 🧠 Local token metadata loading (from Ethereum token list)
-- 🧪 Ready-to-hack developer shell with [Nix](https://nixos.org/)
+- 🦀 Rust backend using [Axum](https://github.com/tokio-rs/axum)
+- ⚙️ Ethereum RPC support via [Alloy](https://github.com/alloy-rs/alloy)
+- 🧠 Local token metadata loading from disk
+- 💡 Modern TypeScript + React frontend built with [Vite](https://vitejs.dev/)
+- 🧪 Nix-based development environment
+- ⚙️ Zero-config task running via [Just](https://github.com/casey/just)
+
+### API Endpoints
+
+- `GET /wallet/{address}/balance`: Native ETH balance
+- `GET /wallet/{address}/tokens`: Top ERC-20 token balances
+- `GET /wallet/{address}`: Unified view of ETH and tokens
 
 ## Quickstart
 
 ### Prerequisites
 
 - [Nix](https://nixos.org/)
-- `direnv` (optional but recommended)
-- `.env` file with your Ethereum RPC:
+- [`direnv`](https://direnv.net/) (optional but recommended)
+- `.env` file in project root:
+- `.env` file in `web/` directory
+
+`.env`:
 
 ```env
 RPC_URL=https://mainnet.infura.io/v3/YOUR_KEY
 ```
 
-### Running locally
+`web/.env`:
+
+```env
+VITE_API_BASE_URL=http://localhost:3000
+```
+
+Initialize direnv (optional):
 
 ```bash
 direnv allow
+```
+
+### Running the backend
+
+```bash
 just cargo run
 ```
 
-Visit: [http://localhost:3000/wallet/0xYourAddressHere](http://localhost:3000/wallet/0xYourAddressHere)
+Server runs at: [http://localhost:3000](http://localhost:3000)
 
-## Project Structure
+### Running the frontend
 
+```bash
+just pnpm install
+just pnpm dev
 ```
-src/
-├── balance.rs       # ETH balance logic
-├── tokens.rs        # ERC-20 token balance logic
-├── wallet.rs        # Unified wallet endpoint
-├── loader.rs        # Token metadata loader
-├── types.rs         # Shared types
-├── routes.rs        # Axum route setup
-└── main.rs          # Entry point
-```
+
+App available at: [http://localhost:5173](http://localhost:5173)
+
+You can enter an Ethereum address to inspect its native balance.
 
 ## Development Environment
 
-This project uses a Nix-based dev shell with:
+This project includes a fully configured Nix dev shell with:
 
 - Nightly Rust (`rust-toolchain.toml`)
-- `rust-overlay`
-- macOS linker support (if applicable)
-- `clang`, `pkg-config`, `taplo` preinstalled
+- `rust-overlay` for managing toolchains
+- `clang`, `pkg-config`, `taplo`, `just`, `nodejs`, and `pnpm`
+- macOS TLS linker support (via `darwin.apple_sdk.frameworks.Security`)
 
-### Dev Shell
+### Launch dev shell
 
 ```bash
 nix develop
 ```
-
