@@ -1,0 +1,8 @@
+/Users/aidan/aidan46/scanza/server/target/debug/deps/alloy_signer_local-7629cd4d870b1c81.d: /Users/aidan/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-signer-local-1.0.23/src/lib.rs /Users/aidan/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-signer-local-1.0.23/src/error.rs /Users/aidan/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-signer-local-1.0.23/src/private_key.rs /Users/aidan/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-signer-local-1.0.23/src/../README.md
+
+/Users/aidan/aidan46/scanza/server/target/debug/deps/liballoy_signer_local-7629cd4d870b1c81.rmeta: /Users/aidan/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-signer-local-1.0.23/src/lib.rs /Users/aidan/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-signer-local-1.0.23/src/error.rs /Users/aidan/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-signer-local-1.0.23/src/private_key.rs /Users/aidan/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-signer-local-1.0.23/src/../README.md
+
+/Users/aidan/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-signer-local-1.0.23/src/lib.rs:
+/Users/aidan/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-signer-local-1.0.23/src/error.rs:
+/Users/aidan/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-signer-local-1.0.23/src/private_key.rs:
+/Users/aidan/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-signer-local-1.0.23/src/../README.md:

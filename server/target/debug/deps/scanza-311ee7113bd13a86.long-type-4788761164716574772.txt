@@ -1,0 +1,1 @@
+alloy::rpc::alloy_rpc_client::RpcCall<alloy::alloy_primitives::Address, _, _, fn(_) -> _>
