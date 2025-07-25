@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
         )
         .init();
 
-    let tokens = load_tokens_from_folder("tokens/eth");
+    let tokens = load_tokens_from_folder("tokens/eth")?;
 
     // get rpc url from env
     let rpc_url = dotenvy::var("RPC_URL").expect("ETH_RPC_URL must be set in .env or environment");

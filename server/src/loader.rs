@@ -1,11 +1,12 @@
 use std::{fs, path::Path, str::FromStr};
 
 use alloy::primitives::Address;
+use anyhow::Result;
 use tracing::{info, warn};
 
 use crate::types::{RawTokenMetadata, TokenMetadata};
 
-pub fn load_tokens_from_folder<P: AsRef<Path>>(folder: P) -> Vec<TokenMetadata> {
+pub fn load_tokens_from_folder<P: AsRef<Path>>(folder: P) -> Result<Vec<TokenMetadata>> {
     let mut tokens = vec![];
 
     for entry in fs::read_dir(folder).expect("Failed to read token directory") {
@@ -54,5 +55,5 @@ pub fn load_tokens_from_folder<P: AsRef<Path>>(folder: P) -> Vec<TokenMetadata> 
     }
 
     info!("Loaded {} tokens", tokens.len());
-    tokens
+    Ok(tokens)
 }
