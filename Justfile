@@ -1,8 +1,9 @@
-# Run the backend server from the root of the project
-run-server:
-  cargo run --manifest-path server/Cargo.toml
+# Run a cargo command inside the server folder
+cargo command:
+  cargo {{command}} --manifest-path server/Cargo.toml
 
-# Run rust tests from the root of the project
-rust-test:
-  cargo test --manifest-path server/Cargo.toml
+# Run a pnpm command inside the web folder with any arguments
+pnpm *args:
+  @echo Running: pnpm --dir web {{args}}
+  pnpm --dir web {{args}}
 

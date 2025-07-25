@@ -1,6 +1,3 @@
-# Ignore target folders at any depth
-**/target/
-
 # macOS metadata
 .DS_Store
 

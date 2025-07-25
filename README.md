@@ -29,7 +29,7 @@ RPC_URL=https://mainnet.infura.io/v3/YOUR_KEY
 
 ```bash
 direnv allow
-just run-server
+just cargo run
 ```
 
 Visit: [http://localhost:3000/wallet/0xYourAddressHere](http://localhost:3000/wallet/0xYourAddressHere)

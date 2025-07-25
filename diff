@@ -1,0 +1,193 @@
+diff --git a/Justfile b/Justfile
+index f90bc28..abbfd50 100644
+--- a/Justfile
++++ b/Justfile
+@@ -1,6 +1,6 @@
+ # Run a cargo command inside the server folder
+-cargo command:
+-  cargo {{command}} --manifest-path server/Cargo.toml
++cargo *args:
++  cargo {{args}} --manifest-path server/Cargo.toml
+ 
+ # Run a pnpm command inside the web folder with any arguments
+ pnpm *args:
+diff --git a/diff b/diff
+index 499fe98..e69de29 100644
+--- a/diff
++++ b/diff
+@@ -1,73 +0,0 @@
+-diff --git a/Justfile b/Justfile
+-index 14f86ef..f90bc28 100644
+---- a/Justfile
+-+++ b/Justfile
+-@@ -1,8 +1,9 @@
+--# Run the backend server from the root of the project
+--run-server:
+--  cargo run --manifest-path server/Cargo.toml
+-+# Run a cargo command inside the server folder
+-+cargo command:
+-+  cargo {{command}} --manifest-path server/Cargo.toml
+- 
+--# Run rust tests from the root of the project
+--rust-test:
+--  cargo test --manifest-path server/Cargo.toml
+-+# Run a pnpm command inside the web folder with any arguments
+-+pnpm *args:
+-+  @echo Running: pnpm --dir web {{args}}
+-+  pnpm --dir web {{args}}
+- 
+-diff --git a/flake.nix b/flake.nix
+-index 9b5b467..196945f 100644
+---- a/flake.nix
+-+++ b/flake.nix
+-@@ -1,9 +1,14 @@
+- {
+--  description = "Scanza - Minimal Rust project setup";
+-+  description = "Scanza";
+- 
+-   inputs = {
+-+    # Utilities to simplify multi-platform support
+-     flake-utils.url = "github:numtide/flake-utils";
+-+
+-+    # Nixpkgs repository (we use the unstable channel for latest packages)
+-     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+-+
+-+    # Rust overlay for installing toolchains via rustup-style config
+-     rust-overlay = {
+-       url = "github:oxalica/rust-overlay";
+-       inputs.nixpkgs.follows = "nixpkgs";
+-@@ -13,19 +18,26 @@
+-   outputs = { self, nixpkgs, flake-utils, rust-overlay }:
+-     flake-utils.lib.eachDefaultSystem (system:
+-       let
+-+        # Apply the Rust overlay
+-         overlays = [ (import rust-overlay) ];
+-+
+-+        # Import nixpkgs with the overlay
+-         pkgs = import nixpkgs { inherit system overlays; };
+- 
+-+        # Use the toolchain defined in rust-toolchain.toml
+-         rustToolchain = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
+- 
+-         buildInputs = with pkgs; [
+--          rustToolchain
+--          clang
+--          pkg-config
+--          taplo
+--          just
+-+          rustToolchain         # Rust compiler and tools from rust-toolchain.toml
+-+          clang                 # Required for building native dependencies (e.g., bindgen)
+-+          pkg-config            # Helps native libraries communicate their compile/link flags
+-+          taplo                 # TOML formatter/linter
+-+          just                  # Task runner (for Justfile commands)
+-+
+-+          nodejs                # Node.js (used for front-end development)
+-+          nodePackages.pnpm     # pnpm package manager (used instead of npm/yarn)
+- 
+--          # Required for macOS TLS / linker success
+-+          # macOS-specific TLS / linking requirements (ignored on Linux)
+-           darwin.apple_sdk.frameworks.Security
+-         ];
+-       in {
+diff --git a/server/Cargo.lock b/server/Cargo.lock
+index d16b6a4..237cc87 100644
+--- a/server/Cargo.lock
++++ b/server/Cargo.lock
+@@ -2927,6 +2927,7 @@ dependencies = [
+  "serde_json",
+  "tempfile",
+  "tokio",
++ "tower-http",
+  "tracing",
+  "tracing-subscriber",
+ ]
+diff --git a/server/Cargo.toml b/server/Cargo.toml
+index 1bfcb0a..f9c5e2b 100644
+--- a/server/Cargo.toml
++++ b/server/Cargo.toml
+@@ -12,6 +12,7 @@ futures = "0.3.31"
+ serde = { version = "1.0.219", features = ["derive"] }
+ serde_json = "1.0.141"
+ tokio = { version = "1.46.1", features = ["full"] }
++tower-http = { version = "0.6.6", features = ["cors"] }
+ tracing = "0.1.41"
+ tracing-subscriber = { version = "0.3.19", features = ["env-filter", "std"] }
+ 
+diff --git a/server/src/main.rs b/server/src/main.rs
+index 107f0d5..f6ca270 100644
+--- a/server/src/main.rs
++++ b/server/src/main.rs
+@@ -8,6 +8,7 @@ use alloy::{
+ use anyhow::Result;
+ use axum::{Router, routing::get};
+ use tokio::net::TcpListener;
++use tower_http::cors::{Any, CorsLayer};
+ use tracing::{info, level_filters::LevelFilter};
+ use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
+ 
+@@ -53,8 +54,17 @@ async fn main() -> Result<()> {
+     // create state
+     let state = AppState { client, tokens };
+ 
++    // cors layer
++    let cors = CorsLayer::new()
++        .allow_origin(Any)
++        .allow_methods(Any)
++        .allow_headers(Any);
++
+     // build the router
+-    let app = Router::new().route("/", get(root)).merge(routes(state));
++    let app = Router::new()
++        .route("/", get(root))
++        .merge(routes(state))
++        .layer(cors);
+ 
+     // bind to localhost:3000
+     let bind_address = SocketAddr::from(([127, 0, 0, 1], 3000));
+diff --git a/web/index.html b/web/index.html
+index e4b78ea..cd390c2 100644
+--- a/web/index.html
++++ b/web/index.html
+@@ -4,7 +4,7 @@
+     <meta charset="UTF-8" />
+     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+-    <title>Vite + React + TS</title>
++    <title>Scanza</title>
+   </head>
+   <body>
+     <div id="root"></div>
+diff --git a/web/src/App.tsx b/web/src/App.tsx
+index 31298b5..a2767ce 100644
+--- a/web/src/App.tsx
++++ b/web/src/App.tsx
+@@ -1,5 +1,28 @@
++import { useState } from "react";
++import AddressInput from "./components/AddressInput";
++import BalanceDisplay from "./components/BalanceDisplay";
++
+ function App() {
+-  return <h1>Scanza Frontend</h1>;
++	const [address, setAddress] = useState<string | null>(null);
++
++	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
++	if (!apiBaseUrl) {
++		throw new Error("VITE_API_BASE_URL is not set in the environment.");
++	}
++	console.log("API_BASE_URL:", apiBaseUrl);
++
++	return (
++		<div>
++			<h1>Scanza</h1>
++			<AddressInput onSubmit={(addr) => setAddress(addr)} />
++			{address && (
++				<>
++					<p>Looking up address: {address}</p>
++					<BalanceDisplay address={address} baseUrl={apiBaseUrl} />
++				</>
++			)}
++		</div>
++	);
+ }
+ 
+ export default App;
