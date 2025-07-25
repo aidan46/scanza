@@ -1,17 +1,11 @@
 use alloy::primitives::{Address, U256};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct TokenMetadata {
+    pub name: String,
     pub address: Address,
     pub symbol: String,
-    pub decimals: u8,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct RawTokenMetadata {
-    pub symbol: String,
-    pub address: String,
     pub decimals: u8,
 }
 
