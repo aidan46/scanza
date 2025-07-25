@@ -8,6 +8,7 @@ use alloy::{
 use anyhow::Result;
 use axum::{Router, routing::get};
 use tokio::net::TcpListener;
+use tower_http::cors::{Any, CorsLayer};
 use tracing::{info, level_filters::LevelFilter};
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -53,8 +54,17 @@ async fn main() -> Result<()> {
     // create state
     let state = AppState { client, tokens };
 
+    // cors layer
+    let cors = CorsLayer::new()
+        .allow_origin(Any)
+        .allow_methods(Any)
+        .allow_headers(Any);
+
     // build the router
-    let app = Router::new().route("/", get(root)).merge(routes(state));
+    let app = Router::new()
+        .route("/", get(root))
+        .merge(routes(state))
+        .layer(cors);
 
     // bind to localhost:3000
     let bind_address = SocketAddr::from(([127, 0, 0, 1], 3000));

@@ -1,6 +1,6 @@
 # Run a cargo command inside the server folder
-cargo command:
-  cargo {{command}} --manifest-path server/Cargo.toml
+cargo *args:
+  cargo {{args}} --manifest-path server/Cargo.toml
 
 # Run a pnpm command inside the web folder with any arguments
 pnpm *args:
