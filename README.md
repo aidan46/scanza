@@ -57,7 +57,7 @@ Server runs at: [http://localhost:3000](http://localhost:3000)
 
 ```bash
 just pnpm install
-just pnpm dev
+just pnpm run dev
 ```
 
 App available at: [http://localhost:5173](http://localhost:5173)
