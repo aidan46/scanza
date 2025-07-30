@@ -1,6 +1,11 @@
 import { formatUnits } from "ethers";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { normalizeHex, shortHash, timeAgo } from "@/lib/txUtils";
+import {
+	formatFunctionName,
+	normalizeString,
+	shortHash,
+	timeAgo,
+} from "@/lib/txUtils";
 import type { Transaction } from "@/lib/types";
 import {
 	Tooltip,
@@ -15,12 +20,14 @@ interface TransactionRowProps {
 }
 
 export default function TransactionRow({ tx, address }: TransactionRowProps) {
-	const isIncoming = normalizeHex(tx.to) === normalizeHex(address);
+	const isIncoming = normalizeString(tx.to) === normalizeString(address);
 	const valueEth = parseFloat(formatUnits(tx.value, 18));
 	const gasFee = parseFloat(
 		formatUnits((BigInt(tx.gasUsed) * BigInt(tx.gasPrice)).toString(), 18),
 	);
-	const method = tx.input && tx.input !== "0x" ? "Contract Call" : "Transfer";
+	const method = tx.functionName
+		? formatFunctionName(normalizeString(tx.functionName))
+		: "Transfer";
 
 	return (
 		<TableRow>
@@ -35,7 +42,7 @@ export default function TransactionRow({ tx, address }: TransactionRowProps) {
 							<span>{shortHash(tx.from)}</span>
 						</TooltipTrigger>
 						<TooltipContent side="top" className="font-mono text-xs">
-							{normalizeHex(tx.from)}
+							{normalizeString(tx.from)}
 						</TooltipContent>
 					</Tooltip>
 				</TooltipProvider>
@@ -47,13 +54,17 @@ export default function TransactionRow({ tx, address }: TransactionRowProps) {
 							<span>{shortHash(tx.to)}</span>
 						</TooltipTrigger>
 						<TooltipContent side="top" className="font-mono text-xs">
-							{normalizeHex(tx.to)}
+							{normalizeString(tx.to)}
 						</TooltipContent>
 					</Tooltip>
 				</TooltipProvider>
-				{isIncoming && (
-					<span className="ml-1 px-1 text-xs rounded bg-green-100 text-green-700">
+				{isIncoming ? (
+					<span className="ml-2 px-1 text-xs rounded bg-green-100 text-green-700">
 						IN
+					</span>
+				) : (
+					<span className="ml-2 px-1 text-xs rounded bg-yellow-100 text-yellow-700">
+						OUT
 					</span>
 				)}
 			</TableCell>

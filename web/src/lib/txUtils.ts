@@ -1,11 +1,18 @@
-export function normalizeHex(value: string): string {
+export function normalizeString(value: string): string {
 	if (!value) return "";
 	return value.replace(/^"+|"+$/g, "").toLowerCase();
 }
 
 export function shortHash(hash: string): string {
-	const clean = normalizeHex(hash);
+	const clean = normalizeString(hash);
 	return `${clean.slice(0, 8)}...${clean.slice(-6)}`;
+}
+
+export function formatFunctionName(signature: string): string {
+	const match = signature.match(/^([a-zA-Z0-9_]+)\s*\(/);
+	if (!match) return "Contract Call";
+	const raw = match[1];
+	return raw.charAt(0).toUpperCase() + raw.slice(1);
 }
 
 export function timeAgo(timestamp: string): string {

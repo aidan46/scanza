@@ -27,4 +27,5 @@ export type Transaction = {
 	timeStamp: string;
 	blockNumber: string;
 	input: string;
+	functionName: string;
 };
