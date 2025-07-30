@@ -77,7 +77,7 @@ export default function Transactions({ address, baseUrl }: TransactionsProps) {
 	}
 
 	return (
-		<Card className="mt-6 w-full max-w-4xl shadow-lg">
+		<Card className="mt-6 w-full shadow-lg">
 			<CardHeader className="text-center space-y-1">
 				<CardTitle className="text-lg font-semibold">Transactions</CardTitle>
 				<p className="text-sm text-muted-foreground font-mono break-all">
