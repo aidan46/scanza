@@ -2,6 +2,12 @@ import { formatUnits } from "ethers";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { normalizeHex, shortHash, timeAgo } from "@/lib/txUtils";
 import type { Transaction } from "@/lib/types";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "../ui/tooltip";
 
 interface TransactionRowProps {
 	tx: Transaction;
@@ -22,9 +28,29 @@ export default function TransactionRow({ tx, address }: TransactionRowProps) {
 			<TableCell>{method}</TableCell>
 			<TableCell>{tx.blockNumber}</TableCell>
 			<TableCell>{timeAgo(tx.timeStamp)}</TableCell>
-			<TableCell className="font-mono">{shortHash(tx.from)}</TableCell>
 			<TableCell className="font-mono">
-				{shortHash(tx.to)}
+				<TooltipProvider>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<span>{shortHash(tx.from)}</span>
+						</TooltipTrigger>
+						<TooltipContent side="top" className="font-mono text-xs">
+							{normalizeHex(tx.from)}
+						</TooltipContent>
+					</Tooltip>
+				</TooltipProvider>
+			</TableCell>
+			<TableCell className="font-mono">
+				<TooltipProvider>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<span>{shortHash(tx.to)}</span>
+						</TooltipTrigger>
+						<TooltipContent side="top" className="font-mono text-xs">
+							{normalizeHex(tx.to)}
+						</TooltipContent>
+					</Tooltip>
+				</TooltipProvider>
 				{isIncoming && (
 					<span className="ml-1 px-1 text-xs rounded bg-green-100 text-green-700">
 						IN
