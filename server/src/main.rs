@@ -5,8 +5,10 @@ use alloy::{
     rpc::client::{ClientBuilder, ReqwestClient},
     transports::http::reqwest::Url,
 };
+use alloy_chains::Chain;
 use anyhow::Result;
 use axum::{Router, routing::get};
+use foundry_block_explorers::Client as EtherscanClient;
 use tokio::net::TcpListener;
 use tower_http::cors::{Any, CorsLayer};
 use tracing::{info, level_filters::LevelFilter};
@@ -25,6 +27,7 @@ async fn root() -> &'static str {
 #[derive(Clone, Debug)]
 pub struct AppState {
     pub client: ReqwestClient,
+    pub etherscan: EtherscanClient,
     pub tokens: Vec<TokenMetadata>,
 }
 
@@ -46,13 +49,23 @@ async fn main() -> Result<()> {
 
     // get rpc url from env
     let rpc_url = dotenvy::var("RPC_URL").expect("ETH_RPC_URL must be set in .env or environment");
-    info!("RPC_URL: {rpc_url}");
 
-    // create client
+    // create alloy client
     let client: ReqwestClient = ClientBuilder::default().http(Url::parse(&rpc_url)?);
 
+    // get etherscan api key from env
+    let etherscan_api_key = dotenvy::var("ETHERSCAN_API_KEY")
+        .expect("ETHERSCAN_API_KEY must be set in .env or environment");
+
+    // create etherscan client
+    let etherscan = EtherscanClient::new(Chain::mainnet(), etherscan_api_key)?;
+
     // create state
-    let state = AppState { client, tokens };
+    let state = AppState {
+        client,
+        etherscan,
+        tokens,
+    };
 
     // cors layer
     let cors = CorsLayer::new()

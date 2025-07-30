@@ -3,3 +3,6 @@
 
 # direnv environment
 .direnv
+
+# env file
+.env
