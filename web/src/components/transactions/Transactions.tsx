@@ -1,5 +1,6 @@
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import Pagination from "@/components/Pagination";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,7 +29,10 @@ export default function Transactions({ address, baseUrl }: TransactionsProps) {
 	const [data, setData] = useState<ApiResponse | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
-	const [page, setPage] = useState(0);
+
+	const [searchParams, setSearchParams] = useSearchParams();
+	const pageParam = parseInt(searchParams.get("page") || "1", 10);
+	const page = Number.isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
 
 	useEffect(() => {
 		setLoading(true);
@@ -38,7 +42,7 @@ export default function Transactions({ address, baseUrl }: TransactionsProps) {
 		const fetchTxs = async () => {
 			try {
 				const res = await fetch(
-					`${baseUrl}/wallet/${address}/transactions?page=${page + 1}&offset=${TXS_PER_PAGE}`,
+					`${baseUrl}/wallet/${address}/transactions?page=${page}&offset=${TXS_PER_PAGE}`,
 				);
 				if (!res.ok) {
 					const text = await res.text();
@@ -96,7 +100,13 @@ export default function Transactions({ address, baseUrl }: TransactionsProps) {
 							address={address}
 						/>
 						{data.pagination.has_more && (
-							<Pagination page={page} totalPages={page + 2} setPage={setPage} />
+							<Pagination
+								page={page - 1}
+								totalPages={page + 1}
+								setPage={(newPage) =>
+									setSearchParams({ page: String(newPage + 1) })
+								}
+							/>
 						)}
 					</>
 				)}
