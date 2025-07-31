@@ -64,7 +64,7 @@ export default function WalletPage({ baseUrl }: WalletPageProps) {
 
         {/* Unified Card with Tabs */}
         <Tabs value={tab} onValueChange={handleTabChange}>
-          <Card className="w-full max-w-5xl mx-auto shadow-lg">
+          <Card className="w-full max-w-7xl mx-auto shadow-lg">
             <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <CardTitle className="text-lg font-semibold">
                 Wallet Details

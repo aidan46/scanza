@@ -5,9 +5,9 @@ export function TransactionHashCell({ hash }: { hash: string }) {
   return (
     <div className="font-mono">
       <CopyableText
-        text={normalizeString(hash)}
-        display={shortHash(hash)}
-        iconSize={16}
+        fullText={normalizeString(hash)}
+        displayText={shortHash(hash)}
+        copyTooltipLabel="Copy Transaciton Hash"
       />
     </div>
   );

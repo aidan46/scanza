@@ -3,17 +3,15 @@ import { normalizeString, shortAddress } from "@/lib/txUtils";
 
 interface AddressCellProps {
   address: string;
-  className?: string;
 }
 
-export function AddressCell({ address, className = "" }: AddressCellProps) {
-  const normalized = normalizeString(address);
+export function AddressCell({ address }: AddressCellProps) {
   return (
     <CopyableText
-      text={normalized}
-      display={shortAddress(address)}
-      tooltipLabel="Copy Address"
-      className={className}
+      fullText={normalizeString(address)}
+      displayText={shortAddress(address)}
+      fullTextTooltip={true}
+      copyTooltipLabel="Copy Address"
     />
   );
 }
