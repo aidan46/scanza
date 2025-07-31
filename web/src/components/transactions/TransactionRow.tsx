@@ -1,6 +1,7 @@
 import { formatUnits } from "ethers";
 import { TableCell, TableRow } from "@/components/ui/table";
 import {
+	formatAmount,
 	formatFunctionName,
 	normalizeString,
 	shortHash,
@@ -68,8 +69,8 @@ export default function TransactionRow({ tx, address }: TransactionRowProps) {
 					</span>
 				)}
 			</TableCell>
-			<TableCell className="text-right">{valueEth.toFixed(5)}</TableCell>
-			<TableCell className="text-right">{gasFee.toFixed(6)}</TableCell>
+			<TableCell className="text-right">{formatAmount(valueEth)}</TableCell>
+			<TableCell className="text-right">{formatAmount(gasFee)}</TableCell>
 		</TableRow>
 	);
 }

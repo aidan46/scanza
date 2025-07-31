@@ -1,3 +1,8 @@
+export function formatAmount(value: number): string {
+	if (value === 0) return "0";
+	return value.toFixed(6).replace(/\.?0+$/, "");
+}
+
 export function normalizeString(value: string): string {
 	if (!value) return "";
 	return value.replace(/^"+|"+$/g, "").toLowerCase();
