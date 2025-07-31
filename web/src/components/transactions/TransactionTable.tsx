@@ -27,7 +27,7 @@ export default function TransactionTable({
 					<TableHead>Age</TableHead>
 					<TableHead>From</TableHead>
 					<TableHead>To</TableHead>
-					<TableHead className="text-right">Amount (ETH)</TableHead>
+					<TableHead className="text-right">Amount</TableHead>
 					<TableHead className="text-right">Txn Fee</TableHead>
 				</TableRow>
 			</TableHeader>

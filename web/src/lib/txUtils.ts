@@ -5,7 +5,7 @@ export function formatAmount(value: number): string {
 
 export function normalizeString(value: string): string {
 	if (!value) return "";
-	return value.replace(/^"+|"+$/g, "").toLowerCase();
+	return value.replace(/^"+|"+$/g, "");
 }
 
 export function shortHash(hash: string): string {
@@ -16,8 +16,19 @@ export function shortHash(hash: string): string {
 export function formatFunctionName(signature: string): string {
 	const match = signature.match(/^([a-zA-Z0-9_]+)\s*\(/);
 	if (!match) return "Contract Call";
+
 	const raw = match[1];
-	return raw.charAt(0).toUpperCase() + raw.slice(1);
+
+	// Split by camelCase and underscores
+	const words = raw
+		.replace(/([a-z0-9])([A-Z])/g, "$1 $2") // camelCase → space
+		.replace(/_/g, " ") // snake_case → space
+		.split(" ");
+
+	// Capitalize each word
+	return words
+		.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+		.join(" ");
 }
 
 export function timeAgo(timestamp: string): string {

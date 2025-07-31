@@ -26,14 +26,33 @@ export default function TransactionRow({ tx, address }: TransactionRowProps) {
 	const gasFee = parseFloat(
 		formatUnits((BigInt(tx.gasUsed) * BigInt(tx.gasPrice)).toString(), 18),
 	);
-	const method = tx.functionName
-		? formatFunctionName(normalizeString(tx.functionName))
+	const rawFunctionName = tx.functionName
+		? normalizeString(tx.functionName)
+		: "";
+	const method = rawFunctionName
+		? formatFunctionName(rawFunctionName)
 		: "Transfer";
 
 	return (
 		<TableRow>
 			<TableCell className="font-mono">{shortHash(tx.hash)}</TableCell>
-			<TableCell>{method}</TableCell>
+			<TableCell className="max-w-[80px] overflow-hidden whitespace-nowrap text-ellipsis">
+				<TooltipProvider>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<span className="block truncate cursor-default">
+								{method.length > 10 ? `${method.slice(0, 10)}…` : method}
+							</span>
+						</TooltipTrigger>
+						<TooltipContent
+							side="top"
+							className="font-mono text-xs max-w-sm break-words"
+						>
+							{method}
+						</TooltipContent>
+					</Tooltip>
+				</TooltipProvider>
+			</TableCell>
 			<TableCell>{tx.blockNumber}</TableCell>
 			<TableCell>{timeAgo(tx.timeStamp)}</TableCell>
 			<TableCell className="font-mono">
@@ -69,7 +88,7 @@ export default function TransactionRow({ tx, address }: TransactionRowProps) {
 					</span>
 				)}
 			</TableCell>
-			<TableCell className="text-right">{formatAmount(valueEth)}</TableCell>
+			<TableCell className="text-right">{`${formatAmount(valueEth)} ETH`}</TableCell>
 			<TableCell className="text-right">{formatAmount(gasFee)}</TableCell>
 		</TableRow>
 	);
