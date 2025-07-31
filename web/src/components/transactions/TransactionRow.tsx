@@ -53,7 +53,7 @@ export default function TransactionRow({ tx, address }: TransactionRowProps) {
 					</Tooltip>
 				</TooltipProvider>
 			</TableCell>
-			<TableCell>{tx.blockNumber}</TableCell>
+			<TableCell>{BigInt(tx.blockNumber)}</TableCell>
 			<TableCell>{timeAgo(tx.timeStamp)}</TableCell>
 			<TableCell className="font-mono">
 				<TooltipProvider>
