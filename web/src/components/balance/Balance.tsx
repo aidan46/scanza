@@ -1,7 +1,6 @@
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { SummaryResponse } from "@/lib/types";
 import Pagination from "../Pagination";
 import BalanceTable from "./BalanceTable";
@@ -83,22 +82,11 @@ export default function Balance({ address, baseUrl, chain }: BalanceProps) {
   const totalPages = Math.ceil(allTokens.length / TOKENS_PER_PAGE);
 
   return (
-    <Card className="mt-6 w-full max-w-2xl shadow-lg">
-      <CardHeader className="text-center space-y-1">
-        <CardTitle className="text-lg font-semibold">
-          Account Overview
-        </CardTitle>
-        <p className="text-sm text-muted-foreground font-mono break-all">
-          {address}
-        </p>
-      </CardHeader>
-      <CardContent className="overflow-x-auto">
-        <BalanceTable tokens={paginatedTokens} />
-
-        {totalPages > 1 && (
-          <Pagination page={page} totalPages={totalPages} setPage={setPage} />
-        )}
-      </CardContent>
-    </Card>
+    <div className="overflow-x-auto">
+      <BalanceTable tokens={paginatedTokens} />
+      {totalPages > 1 && (
+        <Pagination page={page} totalPages={totalPages} setPage={setPage} />
+      )}
+    </div>
   );
 }

@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import Pagination from "@/components/Pagination";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Address, Transaction } from "@/lib/types";
 import TransactionTable from "./TransactionTable";
 
@@ -85,37 +84,24 @@ export default function Transactions({
     );
   }
 
+  if (data.transactions.length === 0) {
+    return (
+      <div className="text-center text-muted-foreground py-4">
+        No transactions found
+      </div>
+    );
+  }
+
   return (
-    <Card className="mt-6 w-full shadow-lg">
-      <CardHeader className="text-center space-y-1">
-        <CardTitle className="text-lg font-semibold">Transactions</CardTitle>
-        <p className="text-sm text-muted-foreground font-mono break-all">
-          {address}
-        </p>
-      </CardHeader>
-      <CardContent className="overflow-x-auto">
-        {data.transactions.length === 0 ? (
-          <div className="text-center text-muted-foreground py-4">
-            No transactions found
-          </div>
-        ) : (
-          <>
-            <TransactionTable
-              transactions={data.transactions}
-              address={address}
-            />
-            {data.pagination.has_more && (
-              <Pagination
-                page={page - 1}
-                totalPages={page + 1}
-                setPage={(newPage) =>
-                  setSearchParams({ page: String(newPage + 1) })
-                }
-              />
-            )}
-          </>
-        )}
-      </CardContent>
-    </Card>
+    <div className="overflow-x-auto">
+      <TransactionTable transactions={data.transactions} address={address} />
+      {data.pagination.has_more && (
+        <Pagination
+          page={page - 1}
+          totalPages={page + 1}
+          setPage={(newPage) => setSearchParams({ page: String(newPage + 1) })}
+        />
+      )}
+    </div>
   );
 }

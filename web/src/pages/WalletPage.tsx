@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import Balance from "@/components/balance/Balance";
 import Transactions from "@/components/transactions/Transactions";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -24,7 +25,6 @@ export default function WalletPage({ baseUrl }: WalletPageProps) {
   const [tab, setTab] = useState("overview");
   const [chain, setChain] = useState("ethereum");
 
-  // Sync tab with URL hash
   useEffect(() => {
     if (location.hash === "#transactions") setTab("transactions");
     else setTab("overview");
@@ -46,6 +46,7 @@ export default function WalletPage({ baseUrl }: WalletPageProps) {
   return (
     <div className="px-4 py-8">
       <div className="max-w-screen-xl mx-auto">
+        {/* Chain selector */}
         <div className="flex justify-end mb-6">
           <Select value={chain} onValueChange={setChain}>
             <SelectTrigger className="w-[180px]">
@@ -61,34 +62,34 @@ export default function WalletPage({ baseUrl }: WalletPageProps) {
           </Select>
         </div>
 
-        {/* Overview / Transactions Tabs */}
-        <Tabs value={tab} onValueChange={handleTabChange} className="w-full">
-          <div className="w-full flex justify-center mb-6">
-            <TabsList className="bg-muted rounded-lg p-1 shadow-md">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="transactions">Transactions</TabsTrigger>
-            </TabsList>
-          </div>
+        {/* Unified Card with Tabs */}
+        <Tabs value={tab} onValueChange={handleTabChange}>
+          <Card className="w-full max-w-5xl mx-auto shadow-lg">
+            <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <CardTitle className="text-lg font-semibold">
+                Wallet Details
+              </CardTitle>
+              <TabsList className="bg-muted rounded-lg p-1 shadow-md">
+                <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="transactions">Transactions</TabsTrigger>
+              </TabsList>
+            </CardHeader>
 
-          <TabsContent value="overview">
-            <div className="w-full flex justify-center">
-              <div className="w-full max-w-2xl">
+            <TabsContent value="overview">
+              <CardContent>
                 <Balance address={address} baseUrl={baseUrl} chain={chain} />
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="transactions">
-            <div className="w-full flex justify-center">
-              <div className="w-full max-w-5xl">
+              </CardContent>
+            </TabsContent>
+            <TabsContent value="transactions">
+              <CardContent>
                 <Transactions
                   address={address}
                   baseUrl={baseUrl}
                   chain={chain}
                 />
-              </div>
-            </div>
-          </TabsContent>
+              </CardContent>
+            </TabsContent>
+          </Card>
         </Tabs>
       </div>
     </div>
