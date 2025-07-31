@@ -1,110 +1,79 @@
 use std::{fs, path::Path};
 
 use anyhow::Result;
-use tracing::{info, warn};
+use tracing::info;
 
 use crate::types::TokenMetadata;
 
-pub fn load_tokens_from_folder<P: AsRef<Path>>(folder: P) -> Result<Vec<TokenMetadata>> {
-    let mut tokens = vec![];
+pub fn load_tokens_from_file<P: AsRef<Path>>(path: P) -> Result<Vec<TokenMetadata>> {
+    let path_ref = path.as_ref();
 
-    for entry in fs::read_dir(folder)? {
-        let entry = match entry {
-            Ok(e) => e,
-            Err(e) => {
-                warn!("Skipping unreadable file: {e}");
-                continue;
-            }
-        };
-        let path = entry.path();
+    let data = fs::read_to_string(path_ref)
+        .map_err(|e| anyhow::anyhow!("Failed to read file {:?}: {}", path_ref, e))?;
 
-        if path.extension().and_then(|s| s.to_str()) != Some("json") {
-            continue;
-        }
+    let tokens: Vec<TokenMetadata> = serde_json::from_str(&data)
+        .map_err(|e| anyhow::anyhow!("Failed to parse JSON in {:?}: {}", path_ref, e))?;
 
-        let data = match fs::read_to_string(&path) {
-            Ok(d) => d,
-            Err(e) => {
-                warn!("Failed to read file {:?}: {e}", path);
-                continue;
-            }
-        };
-
-        let metadata: TokenMetadata = match serde_json::from_str(&data) {
-            Ok(t) => t,
-            Err(e) => {
-                warn!("Skipping file that failed to parse JSON {:?}: {e}", path);
-                continue;
-            }
-        };
-
-        tokens.push(metadata);
-    }
-
-    info!("Loaded {} tokens", tokens.len());
+    info!("Loaded {} tokens from {:?}", tokens.len(), path_ref);
     Ok(tokens)
 }
 
 #[cfg(test)]
 mod tests {
-    use std::fs::write;
+    use std::{io::Write, str::FromStr};
 
-    use tempfile::tempdir;
+    use alloy::primitives::Address;
+    use tempfile::NamedTempFile;
 
-    use super::*;
+    use crate::loader::load_tokens_from_file;
 
     #[test]
-    fn load_tokens_from_valid_folder() {
-        let dir = tempdir().unwrap();
-        let path = dir.path().join("token.json");
+    fn test_load_tokens_from_file() {
+        let mut file = NamedTempFile::new().expect("Failed to create temp file");
 
         let json = r#"
+    [
         {
-            "symbol": "TEST",
-            "address": "0x0000000000000000000000000000000000000000",
+            "symbol": "USDC",
+            "address": "0x1234567890abcdef1234567890abcdef12345678",
+            "decimals": 6,
+            "name": "USD Coin"
+        },
+        {
+            "symbol": "DAI",
+            "address": "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
             "decimals": 18,
-            "name": "Test Token"
+            "name": "Dai Stablecoin"
         }
-        "#;
+    ]
+    "#;
 
-        write(&path, json).unwrap();
+        file.write_all(json.trim().as_bytes())
+            .expect("Failed to write JSON");
 
-        let tokens = load_tokens_from_folder(dir.path()).unwrap();
-        assert_eq!(tokens.len(), 1);
-        assert_eq!(tokens[0].symbol, "TEST");
-        assert_eq!(tokens[0].name, "Test Token");
+        let tokens = load_tokens_from_file(file.path()).expect("Failed to load tokens");
+        assert_eq!(tokens.len(), 2);
+
+        let usdc = tokens
+            .iter()
+            .find(|t| t.symbol == "USDC")
+            .expect("Missing USDC");
         assert_eq!(
-            tokens[0].address.to_string(),
-            "0x0000000000000000000000000000000000000000"
+            usdc.address,
+            Address::from_str("0x1234567890abcdef1234567890abcdef12345678").unwrap()
         );
-    }
+        assert_eq!(usdc.decimals, 6);
+        assert_eq!(usdc.name, "USD Coin");
 
-    #[test]
-    fn skips_invalid_json_file() {
-        let dir = tempdir().unwrap();
-        let path = dir.path().join("invalid.json");
-
-        // Malformed JSON
-        write(&path, r#"{ "symbol": "BAD", "#).unwrap();
-
-        let tokens = load_tokens_from_folder(dir.path()).unwrap();
-        assert!(tokens.is_empty());
-    }
-
-    #[test]
-    fn ignores_non_json_files() {
-        let dir = tempdir().unwrap();
-        let path = dir.path().join("not_a_token.txt");
-
-        write(&path, "This is not JSON").unwrap();
-
-        let tokens = load_tokens_from_folder(dir.path()).unwrap();
-        assert!(tokens.is_empty());
-    }
-
-    #[test]
-    fn fails_on_missing_folder() {
-        let result = load_tokens_from_folder("nonexistent_folder");
-        assert!(result.is_err());
+        let dai = tokens
+            .iter()
+            .find(|t| t.symbol == "DAI")
+            .expect("Missing DAI");
+        assert_eq!(
+            dai.address,
+            Address::from_str("0xabcdefabcdefabcdefabcdefabcdefabcdefabcd").unwrap()
+        );
+        assert_eq!(dai.decimals, 18);
+        assert_eq!(dai.name, "Dai Stablecoin");
     }
 }

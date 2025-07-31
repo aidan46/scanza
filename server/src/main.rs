@@ -48,7 +48,7 @@ async fn main() -> Result<()> {
         Chain::mainnet(),
         &dotenvy::var("ETHEREUM_RPC_URL")?,
         &dotenvy::var("ETHERSCAN_API_KEY")?,
-        "tokens/eth",
+        "tokens/eth.json",
     )?;
     chains.insert(Chains::Ethereum, Arc::new(eth_chain));
 

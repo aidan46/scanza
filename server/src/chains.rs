@@ -9,7 +9,7 @@ use anyhow::Result;
 use foundry_block_explorers::Client as EtherscanClient;
 use serde::{Deserialize, Serialize};
 
-use crate::{loader::load_tokens_from_folder, types::TokenMetadata};
+use crate::{loader::load_tokens_from_file, types::TokenMetadata};
 
 #[macro_export]
 macro_rules! define_clients {
@@ -41,11 +41,11 @@ macro_rules! define_clients {
                     alloy_chain: AlloyChain,
                     rpc_url: &str,
                     etherscan_api_key: &str,
-                    token_dir: &str,
+                    token_file: &str,
                 ) -> Result<Self> {
                     let client: ReqwestClient = ClientBuilder::default().http(Url::parse(rpc_url)?);
                     let etherscan = EtherscanClient::new(alloy_chain, etherscan_api_key)?;
-                    let tokens = load_tokens_from_folder(token_dir)?;
+                    let tokens = load_tokens_from_file(token_file)?;
 
                     Ok(Self {
                         name: Chains::$variant,
