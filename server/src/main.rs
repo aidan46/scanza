@@ -1,21 +1,20 @@
 #![warn(unused_crate_dependencies)]
-use std::net::SocketAddr;
+use std::{collections::HashMap, net::SocketAddr, sync::Arc};
 
-use alloy::{
-    rpc::client::{ClientBuilder, ReqwestClient},
-    transports::http::reqwest::Url,
-};
 use alloy_chains::Chain;
 use anyhow::Result;
 use axum::{Router, routing::get};
-use foundry_block_explorers::Client as EtherscanClient;
 use tokio::net::TcpListener;
 use tower_http::cors::{Any, CorsLayer};
 use tracing::{info, level_filters::LevelFilter};
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
-use crate::{loader::load_tokens_from_folder, routes::routes, types::TokenMetadata};
+use crate::{
+    chains::{ChainClient, Chains, Ethereum},
+    routes::routes,
+};
 
+mod chains;
 mod loader;
 mod routes;
 mod types;
@@ -24,11 +23,9 @@ async fn root() -> &'static str {
     "Welcome to Scanza"
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct AppState {
-    pub client: ReqwestClient,
-    pub etherscan: EtherscanClient,
-    pub tokens: Vec<TokenMetadata>,
+    pub chains: HashMap<Chains, Arc<dyn ChainClient>>,
 }
 
 #[tokio::main]
@@ -45,27 +42,18 @@ async fn main() -> Result<()> {
         )
         .init();
 
-    let tokens = load_tokens_from_folder("tokens/eth")?;
+    let mut chains: HashMap<Chains, Arc<dyn ChainClient>> = HashMap::new();
 
-    // get rpc url from env
-    let rpc_url = dotenvy::var("RPC_URL").expect("ETH_RPC_URL must be set in .env or environment");
-
-    // create alloy client
-    let client: ReqwestClient = ClientBuilder::default().http(Url::parse(&rpc_url)?);
-
-    // get etherscan api key from env
-    let etherscan_api_key = dotenvy::var("ETHERSCAN_API_KEY")
-        .expect("ETHERSCAN_API_KEY must be set in .env or environment");
-
-    // create etherscan client
-    let etherscan = EtherscanClient::new(Chain::mainnet(), etherscan_api_key)?;
+    let eth_chain = Ethereum::new(
+        Chain::mainnet(),
+        &dotenvy::var("ETHEREUM_RPC_URL")?,
+        &dotenvy::var("ETHERSCAN_API_KEY")?,
+        "tokens/eth",
+    )?;
+    chains.insert(Chains::Ethereum, Arc::new(eth_chain));
 
     // create state
-    let state = AppState {
-        client,
-        etherscan,
-        tokens,
-    };
+    let state = AppState { chains };
 
     // cors layer
     let cors = CorsLayer::new()

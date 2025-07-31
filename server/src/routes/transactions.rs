@@ -14,7 +14,7 @@ use serde::Deserialize;
 use serde_json::json;
 use tracing::{error, info};
 
-use crate::AppState;
+use crate::{AppState, chains::Chains};
 
 #[derive(Debug, Deserialize)]
 pub struct TxQuery {
@@ -22,9 +22,8 @@ pub struct TxQuery {
     offset: Option<u64>,
 }
 
-/// Handler for GET /wallet/:address/transactions
 pub async fn get_transactions(
-    Path(address): Path<Address>,
+    Path((chain, address)): Path<(Chains, Address)>,
     Query(params): Query<TxQuery>,
     State(state): State<AppState>,
 ) -> Response {
@@ -32,31 +31,40 @@ pub async fn get_transactions(
     let page = params.page.unwrap_or(1);
     let offset = params.offset.unwrap_or(10);
 
-    match fetch_token_transfers(address, &state.etherscan, page, offset).await {
-        Ok((transfers, has_more)) => {
-            let result = json!({
-                "address": format!("{address:#x}"),
-                "transactions": transfers,
-                "pagination": {
-                    "page": page,
-                    "offset": offset,
-                    "has_more": has_more,
-                    "next_page": if has_more { Some(page + 1) } else { None }
+    match state.chains.get(&chain) {
+        Some(chain) => {
+            match fetch_token_transfers(address, chain.etherscan(), page, offset).await {
+                Ok((transfers, has_more)) => {
+                    let result = json!({
+                        "address": format!("{address:#x}"),
+                        "transactions": transfers,
+                        "pagination": {
+                            "page": page,
+                            "offset": offset,
+                            "has_more": has_more,
+                            "next_page": if has_more { Some(page + 1) } else { None }
+                        }
+                    });
+                    (StatusCode::OK, Json(result)).into_response()
                 }
-            });
-            (StatusCode::OK, Json(result)).into_response()
+                Err(err) => {
+                    error!("Failed to fetch token transfers: {err}");
+                    (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        Json(json!({
+                            "error": "Failed to fetch token transfers",
+                            "details": err.to_string()
+                        })),
+                    )
+                        .into_response()
+                }
+            }
         }
-        Err(err) => {
-            error!("Failed to fetch token transfers: {err}");
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(json!({
-                    "error": "Failed to fetch token transfers",
-                    "details": err.to_string()
-                })),
-            )
-                .into_response()
-        }
+        None => (
+            StatusCode::NOT_FOUND,
+            Json(json!({"error": "Chain not found"})),
+        )
+            .into_response(),
     }
 }
 

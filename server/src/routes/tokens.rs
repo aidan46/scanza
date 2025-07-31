@@ -17,6 +17,7 @@ use tracing::info;
 
 use crate::{
     AppState,
+    chains::Chains,
     types::{TokenBalance, TokenMetadata},
 };
 
@@ -30,16 +31,24 @@ struct TokenResponse {
     tokens: Vec<TokenBalance>,
 }
 
-pub async fn get_tokens(Path(address): Path<Address>, State(state): State<AppState>) -> Response {
+pub async fn get_tokens(
+    Path((chain, address)): Path<(Chains, Address)>,
+    State(state): State<AppState>,
+) -> Response {
     info!("Getting token balances for {address}");
 
-    let balances = fetch_token_balances(address, &state.client, &state.tokens).await;
+    match state.chains.get(&chain) {
+        Some(chain) => {
+            let balances = fetch_token_balances(address, chain.client(), chain.tokens()).await;
 
-    let response = serde_json::json!(TokenResponse {
-        address,
-        tokens: balances,
-    });
-    (StatusCode::OK, Json(response)).into_response()
+            let response = serde_json::json!(TokenResponse {
+                address,
+                tokens: balances,
+            });
+            (StatusCode::OK, Json(response)).into_response()
+        }
+        None => (StatusCode::NOT_FOUND, "Chain not found").into_response(),
+    }
 }
 
 pub async fn fetch_token_balances(

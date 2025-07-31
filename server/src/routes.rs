@@ -15,9 +15,12 @@ mod wallet;
 
 pub fn routes(state: AppState) -> Router {
     Router::new()
-        .route("/wallet/{address}/balance", get(get_balance))
-        .route("/wallet/{address}/tokens", get(get_tokens))
-        .route("/wallet/{address}/transactions", get(get_transactions))
-        .route("/wallet/{address}", get(get_wallet))
+        .route("/{chain}/wallet/{address}/balance", get(get_balance))
+        .route("/{chain}/wallet/{address}/tokens", get(get_tokens))
+        .route(
+            "/{chain}/wallet/{address}/transactions",
+            get(get_transactions),
+        )
+        .route("/{chain}/wallet/{address}", get(get_wallet))
         .with_state(state)
 }

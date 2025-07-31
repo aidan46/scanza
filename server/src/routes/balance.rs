@@ -11,7 +11,7 @@ use axum::{
 use serde::Serialize;
 use tracing::{error, info};
 
-use crate::AppState;
+use crate::{AppState, chains::Chains};
 
 #[derive(Serialize)]
 pub struct WalletBalanceResponse {
@@ -19,20 +19,30 @@ pub struct WalletBalanceResponse {
     pub balance: U256,
 }
 
-pub async fn get_balance(Path(address): Path<Address>, State(state): State<AppState>) -> Response {
+pub async fn get_balance(
+    Path((chain, address)): Path<(Chains, Address)>,
+    State(state): State<AppState>,
+) -> Response {
     info!("Request for {address}");
 
-    match fetch_balance(address, &state.client).await {
-        Ok(balance) => {
-            let response = WalletBalanceResponse { address, balance };
-            (StatusCode::OK, Json(response)).into_response()
-        }
-        Err(err) => (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(serde_json::json!({
-                "error": "Failed to fetch balance",
-                "details": err.to_string()
-            })),
+    match state.chains.get(&chain) {
+        Some(chain) => match fetch_balance(address, chain.client()).await {
+            Ok(balance) => {
+                let response = WalletBalanceResponse { address, balance };
+                (StatusCode::OK, Json(response)).into_response()
+            }
+            Err(err) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(serde_json::json!({
+                    "error": "Failed to fetch balance",
+                    "details": err.to_string()
+                })),
+            )
+                .into_response(),
+        },
+        None => (
+            StatusCode::NOT_FOUND,
+            Json(serde_json::json!({"error": "Chain not found"})),
         )
             .into_response(),
     }

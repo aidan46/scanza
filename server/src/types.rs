@@ -14,3 +14,10 @@ pub struct TokenBalance {
     pub token: TokenMetadata,
     pub balance: U256,
 }
+
+#[derive(Debug, Serialize)]
+pub struct WalletSummary {
+    pub address: Address,
+    pub native_balance: U256,
+    pub tokens: Vec<TokenBalance>,
+}
