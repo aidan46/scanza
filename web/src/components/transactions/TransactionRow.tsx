@@ -4,17 +4,12 @@ import {
 	formatAmount,
 	formatFunctionName,
 	normalizeString,
-	shortAddress,
-	shortHash,
 	timeAgo,
 } from "@/lib/txUtils";
 import type { Transaction } from "@/lib/types";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipProvider,
-	TooltipTrigger,
-} from "../ui/tooltip";
+import { AddressCell } from "./AddressCell";
+import { MethodCell } from "./MethodCell";
+import { TransactionHashCell } from "./TransactionHashCell";
 
 interface TransactionRowProps {
 	tx: Transaction;
@@ -36,49 +31,19 @@ export default function TransactionRow({ tx, address }: TransactionRowProps) {
 
 	return (
 		<TableRow>
-			<TableCell className="font-mono">{shortHash(tx.hash)}</TableCell>
+			<TableCell className="font-mono flex items-center gap-1">
+				<TransactionHashCell hash={tx.hash} />
+			</TableCell>
 			<TableCell className="max-w-[80px] overflow-hidden whitespace-nowrap text-ellipsis">
-				<TooltipProvider>
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<span className="block truncate cursor-default">
-								{method.length > 10 ? `${method.slice(0, 10)}…` : method}
-							</span>
-						</TooltipTrigger>
-						<TooltipContent
-							side="top"
-							className="font-mono text-xs max-w-sm break-words"
-						>
-							{method}
-						</TooltipContent>
-					</Tooltip>
-				</TooltipProvider>
+				<MethodCell method={method} />
 			</TableCell>
 			<TableCell>{BigInt(tx.blockNumber)}</TableCell>
 			<TableCell>{timeAgo(tx.timeStamp)}</TableCell>
 			<TableCell className="font-mono">
-				<TooltipProvider>
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<span>{shortAddress(tx.from)}</span>
-						</TooltipTrigger>
-						<TooltipContent side="top" className="font-mono text-xs">
-							{normalizeString(tx.from)}
-						</TooltipContent>
-					</Tooltip>
-				</TooltipProvider>
+				<AddressCell address={tx.from} />
 			</TableCell>
 			<TableCell className="font-mono">
-				<TooltipProvider>
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<span>{shortAddress(tx.to)}</span>
-						</TooltipTrigger>
-						<TooltipContent side="top" className="font-mono text-xs">
-							{normalizeString(tx.to)}
-						</TooltipContent>
-					</Tooltip>
-				</TooltipProvider>
+				<AddressCell address={tx.to} />
 				{isIncoming ? (
 					<span className="ml-2 px-1 text-xs rounded bg-green-100 text-green-700">
 						IN
