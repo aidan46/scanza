@@ -10,7 +10,12 @@ export function normalizeString(value: string): string {
 
 export function shortHash(hash: string): string {
 	const clean = normalizeString(hash);
-	return `${clean.slice(0, 8)}...${clean.slice(-6)}`;
+	return `${clean.slice(0, 10)}…`;
+}
+
+export function shortAddress(hash: string): string {
+	const clean = normalizeString(hash);
+	return `${clean.slice(0, 8)}…${clean.slice(-6)}`;
 }
 
 export function formatFunctionName(signature: string): string {

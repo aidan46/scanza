@@ -4,6 +4,7 @@ import {
 	formatAmount,
 	formatFunctionName,
 	normalizeString,
+	shortAddress,
 	shortHash,
 	timeAgo,
 } from "@/lib/txUtils";
@@ -59,7 +60,7 @@ export default function TransactionRow({ tx, address }: TransactionRowProps) {
 				<TooltipProvider>
 					<Tooltip>
 						<TooltipTrigger asChild>
-							<span>{shortHash(tx.from)}</span>
+							<span>{shortAddress(tx.from)}</span>
 						</TooltipTrigger>
 						<TooltipContent side="top" className="font-mono text-xs">
 							{normalizeString(tx.from)}
@@ -71,7 +72,7 @@ export default function TransactionRow({ tx, address }: TransactionRowProps) {
 				<TooltipProvider>
 					<Tooltip>
 						<TooltipTrigger asChild>
-							<span>{shortHash(tx.to)}</span>
+							<span>{shortAddress(tx.to)}</span>
 						</TooltipTrigger>
 						<TooltipContent side="top" className="font-mono text-xs">
 							{normalizeString(tx.to)}
