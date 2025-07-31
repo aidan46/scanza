@@ -6,3 +6,6 @@
 
 # env file
 .env
+
+# DS_Store removal script
+remove-ds-store.sh

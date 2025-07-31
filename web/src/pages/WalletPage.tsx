@@ -3,7 +3,15 @@ import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import Balance from "@/components/balance/Balance";
 import Transactions from "@/components/transactions/Transactions";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SUPPORTED_CHAINS } from "@/lib/constants";
 
 interface WalletPageProps {
   baseUrl: string;
@@ -12,7 +20,9 @@ interface WalletPageProps {
 export default function WalletPage({ baseUrl }: WalletPageProps) {
   const { address } = useParams<{ address: string }>();
   const location = useLocation();
+
   const [tab, setTab] = useState("overview");
+  const [chain, setChain] = useState("ethereum");
 
   // Sync tab with URL hash
   useEffect(() => {
@@ -28,7 +38,7 @@ export default function WalletPage({ baseUrl }: WalletPageProps) {
   if (!isAddress(address)) {
     return (
       <p className="text-center mt-8 text-red-500 font-medium">
-        Invalid Ethereum address
+        Invalid address
       </p>
     );
   }
@@ -36,6 +46,22 @@ export default function WalletPage({ baseUrl }: WalletPageProps) {
   return (
     <div className="px-4 py-8">
       <div className="max-w-screen-xl mx-auto">
+        <div className="flex justify-end mb-6">
+          <Select value={chain} onValueChange={setChain}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select chain" />
+            </SelectTrigger>
+            <SelectContent>
+              {SUPPORTED_CHAINS.map(({ id, label }) => (
+                <SelectItem key={id} value={id}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Overview / Transactions Tabs */}
         <Tabs value={tab} onValueChange={handleTabChange} className="w-full">
           <div className="w-full flex justify-center mb-6">
             <TabsList className="bg-muted rounded-lg p-1 shadow-md">
@@ -47,7 +73,7 @@ export default function WalletPage({ baseUrl }: WalletPageProps) {
           <TabsContent value="overview">
             <div className="w-full flex justify-center">
               <div className="w-full max-w-2xl">
-                <Balance address={address} baseUrl={baseUrl} chain="ethereum" />
+                <Balance address={address} baseUrl={baseUrl} chain={chain} />
               </div>
             </div>
           </TabsContent>
@@ -58,7 +84,7 @@ export default function WalletPage({ baseUrl }: WalletPageProps) {
                 <Transactions
                   address={address}
                   baseUrl={baseUrl}
-                  chain="ethereum"
+                  chain={chain}
                 />
               </div>
             </div>
