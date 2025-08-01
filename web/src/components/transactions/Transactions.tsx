@@ -99,6 +99,7 @@ export default function Transactions({
 					page={page - 1}
 					totalPages={page + 1}
 					setPage={(newPage) => setSearchParams({ page: String(newPage + 1) })}
+					includeNext={false}
 				/>
 			)}
 		</div>

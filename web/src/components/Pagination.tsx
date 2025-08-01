@@ -4,12 +4,14 @@ interface PaginationProps {
 	page: number;
 	totalPages: number;
 	setPage: (page: number) => void;
+	includeNext?: boolean;
 }
 
 export default function Pagination({
 	page,
 	totalPages,
 	setPage,
+	includeNext = true,
 }: PaginationProps) {
 	return (
 		<div className="flex justify-between items-center mt-4">
@@ -22,7 +24,8 @@ export default function Pagination({
 			)}
 
 			<span className="text-sm text-muted-foreground">
-				Page {page + 1} of {totalPages}
+				Page {page + 1}
+				{includeNext && ` of ${totalPages}`}
 			</span>
 
 			{page + 1 < totalPages ? (
