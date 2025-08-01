@@ -43,12 +43,6 @@
     "name": "USD//Coin"
   },
   {
-    "symbol": "USDC",
-    "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-    "decimals": 6,
-    "name": "USD//Coin"
-  },
-  {
     "symbol": "SNX",
     "address": "0xC011a73ee8576Fb46F5E1c5751cA3B9Fe0af2a6F",
     "decimals": 18,
