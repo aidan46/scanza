@@ -23,15 +23,22 @@ async fn root() -> &'static str {
     "Welcome to Scanza"
 }
 
-#[derive(Clone)]
-pub struct AppState {
-    pub chains: HashMap<Chains, Arc<dyn ChainClient>>,
+fn init_app_state() -> Result<AppState> {
+    let mut chains: HashMap<Chains, Arc<dyn ChainClient>> = HashMap::new();
+
+    // Ethereum
+    let eth = Ethereum::new(
+        Chain::mainnet(),
+        &dotenvy::var("ETHEREUM_RPC_URL")?,
+        &dotenvy::var("ETHERSCAN_API_KEY")?,
+        "tokens/eth.json",
+    )?;
+    chains.insert(Chains::Ethereum, Arc::new(eth));
+
+    Ok(AppState { chains })
 }
 
-#[tokio::main]
-async fn main() -> Result<()> {
-    // load .env file
-    dotenvy::dotenv().ok();
+fn init_tracing() -> Result<()> {
     // set up logging
     tracing_subscriber::registry()
         .with(fmt::layer())
@@ -41,20 +48,10 @@ async fn main() -> Result<()> {
                 .from_env()?,
         )
         .init();
+    Ok(())
+}
 
-    let mut chains: HashMap<Chains, Arc<dyn ChainClient>> = HashMap::new();
-
-    let eth_chain = Ethereum::new(
-        Chain::mainnet(),
-        &dotenvy::var("ETHEREUM_RPC_URL")?,
-        &dotenvy::var("ETHERSCAN_API_KEY")?,
-        "tokens/eth.json",
-    )?;
-    chains.insert(Chains::Ethereum, Arc::new(eth_chain));
-
-    // create state
-    let state = AppState { chains };
-
+fn init_router(state: AppState) -> Result<Router> {
     // cors layer
     let cors = CorsLayer::new()
         .allow_origin(Any)
@@ -62,10 +59,30 @@ async fn main() -> Result<()> {
         .allow_headers(Any);
 
     // build the router
-    let app = Router::new()
+    Ok(Router::new()
         .route("/", get(root))
         .merge(routes(state))
-        .layer(cors);
+        .layer(cors))
+}
+
+#[derive(Clone)]
+pub struct AppState {
+    pub chains: HashMap<Chains, Arc<dyn ChainClient>>,
+}
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    // load .env file
+    dotenvy::dotenv().ok();
+
+    // initialize tracing
+    init_tracing()?;
+
+    // initialize app state
+    let state = init_app_state()?;
+
+    // initialize router
+    let app = init_router(state)?;
 
     // bind to localhost:3000
     let bind_address = SocketAddr::from(([127, 0, 0, 1], 3000));
