@@ -36,6 +36,7 @@
 
           nodejs                # Node.js (used for front-end development)
           nodePackages.pnpm     # pnpm package manager (used instead of npm/yarn)
+          pre-commit            # Git pre-commit hook manager
 
           # macOS-specific TLS / linking requirements (ignored on Linux)
           darwin.apple_sdk.frameworks.Security
