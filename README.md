@@ -1,6 +1,7 @@
 # Scanza
 
-Scanza is a lightweight Ethereum wallet inspector with a React frontend and an Axum-based Rust backend powered by Alloy.
+Scanza is a lightweight Ethereum wallet inspector with a React frontend
+and an Axum-based Rust backend powered by Alloy.
 It allows you to query a wallet's native ETH balance and token holdings.
 
 ## Features
@@ -14,24 +15,18 @@ It allows you to query a wallet's native ETH balance and token holdings.
 
 ### API Endpoints
 
-- `GET /wallet/{address}/balance`: Native ETH balance
-- `GET /wallet/{address}/tokens`: Top ERC-20 token balances
-- `GET /wallet/{address}`: Unified view of ETH and tokens
+- `GET /chains`: List of loaded chains
+- `GET /{chain}/wallet/{address}/balance`: Native ETH balance
+- `GET /{chain}/wallet/{address}/tokens`: Token balances
+- `GET /{chain}/wallet/{address}`: Unified view of ETH and tokens
 
-## Quickstart
+## Quick start
 
 ### Prerequisites
 
 - [Nix](https://nixos.org/)
 - [`direnv`](https://direnv.net/) (optional but recommended)
-- `.env` file in project root:
 - `.env` file in `web/` directory
-
-`.env`:
-
-```env
-RPC_URL=https://mainnet.infura.io/v3/YOUR_KEY
-```
 
 `web/.env`:
 
@@ -48,7 +43,7 @@ direnv allow
 ### Running the backend
 
 ```bash
-just cargo run
+cargo run -p server
 ```
 
 Server runs at: [http://localhost:3000](http://localhost:3000)
@@ -70,7 +65,7 @@ This project includes a fully configured Nix dev shell with:
 
 - Nightly Rust (`rust-toolchain.toml`)
 - `rust-overlay` for managing toolchains
-- `clang`, `pkg-config`, `taplo`, `just`, `nodejs`, and `pnpm`
+- `clang`, `pkg-config`, `taplo`, `just`, `nodejs`, `pre-commit` and `pnpm`
 - macOS TLS linker support (via `darwin.apple_sdk.frameworks.Security`)
 
 ### Launch dev shell
