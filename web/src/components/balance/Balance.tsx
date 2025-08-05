@@ -1,5 +1,6 @@
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useChains } from "@/ChainsProvider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { TOKENS_PER_PAGE } from "@/lib/constants";
 import type { SummaryResponse } from "@/lib/types";
@@ -17,6 +18,18 @@ export default function Balance({ address, baseUrl, chain }: BalanceProps) {
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [page, setPage] = useState(0);
+	const { chains } = useChains();
+	const chainMetadata = chains.find((c) => c.shortName === chain);
+	if (!chainMetadata) {
+		throw new Error(`Unknown chain: ${chain}`);
+	}
+
+	const token = {
+		name: chainMetadata.name,
+		address: "native",
+		symbol: chainMetadata.nativeCurrency.symbol,
+		decimals: chainMetadata.nativeCurrency.decimals,
+	};
 
 	useEffect(() => {
 		setLoading(true);
@@ -31,7 +44,6 @@ export default function Balance({ address, baseUrl, chain }: BalanceProps) {
 					const errorText = await res.text();
 					throw new Error(`HTTP ${res.status}: ${errorText}`);
 				}
-
 				const summary: SummaryResponse = await res.json();
 				setData(summary);
 			} catch (err) {
@@ -65,12 +77,7 @@ export default function Balance({ address, baseUrl, chain }: BalanceProps) {
 
 	const allTokens = [
 		{
-			token: {
-				name: "Ethereum",
-				address: "native",
-				symbol: "ETH",
-				decimals: 18,
-			},
+			token,
 			balance: data.native_balance,
 		},
 		...data.tokens,

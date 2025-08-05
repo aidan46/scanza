@@ -1,4 +1,5 @@
 use axum::{Json, Router, extract::State, routing::get};
+use multichain_client::ChainMetaData;
 
 use crate::{
     AppState,
@@ -13,25 +14,13 @@ mod tokens;
 mod transactions;
 mod wallet;
 
-use serde::Serialize;
-
-#[derive(Serialize)]
-pub struct ChainInfo {
-    #[serde(rename = "shortName")]
-    pub short_name: String,
-    pub name: String,
-}
-
 /// GET /chains — Returns list of loaded chains
-pub async fn get_chains(State(state): State<AppState>) -> Json<Vec<ChainInfo>> {
+pub async fn get_chains(State(state): State<AppState>) -> Json<Vec<ChainMetaData>> {
     let chains = state
         .registry
         .inner()
-        .iter()
-        .map(|(key, client)| ChainInfo {
-            short_name: key.to_string(),
-            name: client.name().to_string(),
-        })
+        .values()
+        .map(|client| client.metadata().clone())
         .collect();
 
     Json(chains)

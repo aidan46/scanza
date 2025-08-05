@@ -10,4 +10,4 @@ mod client;
 mod metadata;
 
 pub use client::{EvmChainClient, EvmClientRegistry};
-pub use metadata::{ChainMetaData, TokenBalance, TokenMetadata};
+pub use metadata::{ChainMetaData, NativeCurrency, TokenBalance, TokenMetadata};

@@ -1,12 +1,29 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-interface ChainInfo {
+interface NativeCurrency {
+	/// Full name of the native currency (e.g., "Ether")
 	name: string;
+	/// Symbol of the native currency (e.g., "ETH")
+	symbol: string;
+	/// Number of decimals used by the currency (typically 18)
+	decimals: number;
+}
+
+interface ChainMetaData {
+	/// Full name of the chain (e.g., "Ethereum Mainnet")
+	name: string;
+	/// EVM chain ID (e.g., 1 for Ethereum)
+	chainId: number;
+	/// Short name identifier (e.g., "eth")
 	shortName: string;
+	/// Network ID (sometimes differs from chain ID)
+	networkId: number;
+	/// Native currency metadata (name, symbol, decimals)
+	nativeCurrency: NativeCurrency;
 }
 
 interface ChainsContextType {
-	chains: ChainInfo[];
+	chains: ChainMetaData[];
 	loading: boolean;
 	error: string | null;
 }
@@ -24,7 +41,7 @@ export function ChainsProvider({
 	baseUrl: string;
 	children: React.ReactNode;
 }) {
-	const [chains, setChains] = useState<ChainInfo[]>([]);
+	const [chains, setChains] = useState<ChainMetaData[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
@@ -33,7 +50,7 @@ export function ChainsProvider({
 			try {
 				const res = await fetch(`${baseUrl}/chains`);
 				if (!res.ok) throw new Error(`Failed to load chains: ${res.status}`);
-				const chains: ChainInfo[] = await res.json();
+				const chains: ChainMetaData[] = await res.json();
 				setChains(chains);
 			} catch (err) {
 				setError(`${err}`);

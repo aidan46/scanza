@@ -10,12 +10,12 @@ use alloy::{
 use alloy_chains::Chain;
 use anyhow::{Context, Result};
 use foundry_block_explorers::Client as EtherscanClient;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::{EvmChainClient, metadata::TokenMetadata};
 
 /// Metadata describing a chain's native currency (e.g., ETH, MATIC, etc.)
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct NativeCurrency {
     /// Full name of the native currency (e.g., "Ether")
     pub name: String,
@@ -28,7 +28,7 @@ pub struct NativeCurrency {
 /// Chain metadata, usually parsed from chain-list JSON files.
 ///
 /// Includes basic chain identity and a list of RPC endpoints.
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct ChainMetaData {
     /// Full name of the chain (e.g., "Ethereum Mainnet")
     pub name: String,
@@ -74,8 +74,7 @@ impl ChainMetaData {
         let etherscan = EtherscanClient::new(Chain::from_id(self.chain_id), etherscan_api_key)?;
 
         Ok(EvmChainClient::new(
-            self.name.clone(),
-            self.native_currency.clone(),
+            self.clone(),
             Arc::new(rpc_client),
             Arc::new(etherscan),
             vec![],
@@ -105,8 +104,7 @@ impl ChainMetaData {
         let etherscan = EtherscanClient::new(Chain::from_id(self.chain_id), etherscan_api_key)?;
 
         Ok(EvmChainClient::new(
-            self.name.clone(),
-            self.native_currency.clone(),
+            self.clone(),
             Arc::new(rpc_client),
             Arc::new(etherscan),
             tokens,

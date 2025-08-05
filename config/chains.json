@@ -54,5 +54,33 @@
     "rpc": [
       "https://base.llamarpc.com"
     ]
+  },
+  {
+    "name": "Polygon Mainnet",
+    "chainId": 137,
+    "shortName": "pol",
+    "networkId": 137,
+    "nativeCurrency": {
+      "name": "POL",
+      "symbol": "POL",
+      "decimals": 18
+    },
+    "rpc": [
+      "https://polygon-bor-rpc.publicnode.com"
+    ]
+  },
+  {
+    "name": "Avalanche C-Chain",
+    "chainId": 43114,
+    "shortName": "avax",
+    "networkId": 43114,
+    "nativeCurrency": {
+      "name": "Avalanche",
+      "symbol": "AVAX",
+      "decimals": 18
+    },
+    "rpc": [
+      "https://avalanche-c-chain-rpc.publicnode.com"
+    ]
   }
 ]

@@ -33,6 +33,7 @@ pub async fn get_wallet(
 
             let tokens = client.get_token_balances(address).await;
 
+            info!("native_balance: {native_balance}");
             let response = WalletSummary {
                 address,
                 native_balance,

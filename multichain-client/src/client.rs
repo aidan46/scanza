@@ -19,7 +19,10 @@ use foundry_block_explorers::{
 use futures::future::{join_all, try_join_all};
 use tracing::{info, warn};
 
-use crate::metadata::{NativeCurrency, TokenBalance, TokenMetadata};
+use crate::{
+    ChainMetaData,
+    metadata::{NativeCurrency, TokenBalance, TokenMetadata},
+};
 
 sol! {
     function balanceOf(address) external view returns (uint256);
@@ -29,8 +32,7 @@ sol! {
 /// Holds RPC and Etherscan clients, native currency metadata, and token metadata.
 #[derive(Clone)]
 pub struct EvmChainClient {
-    name: String,
-    native_currency: NativeCurrency,
+    metadata: ChainMetaData,
     rpc_client: Arc<ReqwestClient>,
     etherscan: Arc<EtherscanClient>,
     tokens: Vec<TokenMetadata>,
@@ -39,24 +41,22 @@ pub struct EvmChainClient {
 impl EvmChainClient {
     /// Constructs a new `EvmChainClient`.
     pub fn new(
-        name: String,
-        native_currency: NativeCurrency,
+        metadata: ChainMetaData,
         rpc_client: Arc<ReqwestClient>,
         etherscan: Arc<EtherscanClient>,
         tokens: Vec<TokenMetadata>,
     ) -> Self {
         Self {
-            name,
-            native_currency,
+            metadata,
             rpc_client,
             etherscan,
             tokens,
         }
     }
 
-    /// Returns the name of the chain.
-    pub fn name(&self) -> &str {
-        &self.name
+    /// Returns the chain [`ChainMetaData`].
+    pub fn metadata(&self) -> &ChainMetaData {
+        &self.metadata
     }
 
     /// Returns the RPC client for interacting with the chain.
@@ -76,7 +76,7 @@ impl EvmChainClient {
 
     /// Returns the native currency metadata (e.g., ETH or MATIC).
     pub fn native_currency(&self) -> &NativeCurrency {
-        &self.native_currency
+        &self.metadata.native_currency
     }
 
     /// Appends tokens from a JSON file to the internal token list.
