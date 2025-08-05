@@ -15,7 +15,6 @@ use crate::{
 mod cli;
 mod init;
 mod routes;
-mod types;
 
 async fn root() -> &'static str {
     "Welcome to Scanza"

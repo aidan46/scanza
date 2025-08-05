@@ -7,7 +7,7 @@ use axum::{
 };
 use serde::Deserialize;
 use serde_json::json;
-use tracing::{error, info};
+use tracing::{error, info, warn};
 
 use crate::AppState;
 
@@ -22,16 +22,16 @@ pub async fn get_transactions(
     Query(params): Query<TxQuery>,
     State(state): State<AppState>,
 ) -> Response {
-    info!("Fetching transactions for {address}");
+    info!("Getting transactions for {address} on {chain}");
     let page = params.page.unwrap_or(1);
     let offset = params.offset.unwrap_or(10);
 
     match state.registry.get(&chain) {
         Some(client) => match client.get_transactions(address, page, offset).await {
-            Ok((transfers, has_more)) => {
+            Ok((transactions, has_more)) => {
                 let result = json!({
                     "address": format!("{address:#x}"),
-                    "transactions": transfers,
+                    "transactions": transactions,
                     "pagination": {
                         "page": page,
                         "offset": offset,
@@ -53,10 +53,13 @@ pub async fn get_transactions(
                     .into_response()
             }
         },
-        None => (
-            StatusCode::NOT_FOUND,
-            Json(json!({"error": "Chain not found"})),
-        )
-            .into_response(),
+        None => {
+            warn!("Chain not found: {chain}");
+            (
+                StatusCode::NOT_FOUND,
+                Json(json!({"error": "Chain not found"})),
+            )
+                .into_response()
+        }
     }
 }

@@ -7,7 +7,7 @@ use axum::{
 };
 use multichain_client::TokenBalance;
 use serde::Serialize;
-use tracing::info;
+use tracing::{info, warn};
 
 use crate::AppState;
 
@@ -21,7 +21,7 @@ pub async fn get_tokens(
     Path((chain, address)): Path<(String, Address)>,
     State(state): State<AppState>,
 ) -> Response {
-    info!("Getting token balances for {address}");
+    info!("Getting token balances for {address} on {chain}");
 
     match state.registry.get(&chain) {
         Some(client) => {
@@ -33,6 +33,9 @@ pub async fn get_tokens(
             });
             (StatusCode::OK, Json(response)).into_response()
         }
-        None => (StatusCode::NOT_FOUND, "Chain not found").into_response(),
+        None => {
+            warn!("Chain {chain} not found");
+            (StatusCode::NOT_FOUND, "Chain not found").into_response()
+        }
     }
 }
