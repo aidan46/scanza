@@ -1,6 +1,7 @@
 import { isAddress } from "ethers";
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
+import { useChains } from "@/ChainsProvider";
 import Balance from "@/components/balance/Balance";
 import Transactions from "@/components/transactions/Transactions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,7 +13,6 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useChains } from "@/ChainsProvider";
 
 interface WalletPageProps {
 	baseUrl: string;
@@ -23,7 +23,7 @@ export default function WalletPage({ baseUrl }: WalletPageProps) {
 	const location = useLocation();
 	const { chains, loading, error } = useChains();
 	const [tab, setTab] = useState("overview");
-	const [chain, setChain] = useState("arb1");
+	const [chain, setChain] = useState("eth");
 
 	useEffect(() => {
 		if (location.hash === "#transactions") setTab("transactions");

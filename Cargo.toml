@@ -15,6 +15,7 @@ alloy = { version = "1.0.23", default-features = false }
 alloy-chains = { version = "0.2.6", default-features = false }
 anyhow = { version = "1.0.98", default-features = false }
 axum = { version = "0.8.4", default-features = false }
+clap = { version = "4.5.42" }
 dotenvy = { version = "0.15.7", default-features = false }
 foundry-block-explorers = { version = "0.20.0", default-features = false }
 futures = { version = "0.3.31", default-features = false }

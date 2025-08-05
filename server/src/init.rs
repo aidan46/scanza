@@ -1,4 +1,8 @@
-use std::{collections::HashMap, fs, path::Path};
+use std::{
+    collections::HashMap,
+    fs,
+    path::{Path, PathBuf},
+};
 
 use anyhow::Result;
 use axum::{Router, routing::get};
@@ -9,9 +13,10 @@ use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberI
 
 use crate::{AppState, root, routes::routes};
 
-pub fn init_app_state<P: AsRef<Path>>(chain_list: P) -> Result<AppState> {
+pub fn init_app_state<P: AsRef<Path>>(chain_list: P, token_folder: PathBuf) -> Result<AppState> {
     let etherscan_api_key = dotenvy::var("ETHERSCAN_API_KEY")?;
-    let registry = create_registry(read_chains_from_json(chain_list)?, &etherscan_api_key)?;
+    let chains = read_chains_from_json(chain_list)?;
+    let registry = create_registry(chains, token_folder, &etherscan_api_key)?;
 
     Ok(AppState { registry })
 }
@@ -50,17 +55,21 @@ fn read_chains_from_json<P: AsRef<Path>>(path: P) -> Result<Vec<ChainMetaData>> 
 
 fn create_registry(
     chains: Vec<ChainMetaData>,
+    token_folder: PathBuf,
     etherscan_api_key: &str,
 ) -> Result<EvmClientRegistry> {
     let mut client_map = HashMap::new();
     for chain in chains.iter() {
         if let Ok(mut client) = chain.create_rpc_client(etherscan_api_key) {
             info!("✅ Created client for {}", chain.name);
-            let path_str = format!("config/{}-tokens.json", chain.short_name);
-            let path = Path::new(&path_str);
+            let path = token_folder.join(format!("{}-tokens.json", chain.short_name));
             if path.exists() {
                 client.add_tokens_from_file(path)?;
-                info!("✅ Added tokens for {}", chain.name);
+                info!(
+                    "✅ Added {} tokens for {}",
+                    client.tokens().len(),
+                    chain.name
+                );
             }
             client_map.insert(chain.short_name.clone(), client);
         }

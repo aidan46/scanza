@@ -2,12 +2,17 @@
 use std::net::SocketAddr;
 
 use anyhow::Result;
+use clap::Parser;
 use multichain_client::EvmClientRegistry;
 use tokio::net::TcpListener;
 use tracing::info;
 
-use crate::init::{init_app_state, init_router, init_tracing};
+use crate::{
+    cli::Cli,
+    init::{init_app_state, init_router, init_tracing},
+};
 
+mod cli;
 mod init;
 mod routes;
 mod types;
@@ -29,8 +34,10 @@ async fn main() -> Result<()> {
     // initialize tracing
     init_tracing()?;
 
+    let cli = Cli::parse();
+
     // initialize app state
-    let state = init_app_state("config/chains.json")?;
+    let state = init_app_state(cli.chains, cli.token_folder)?;
 
     // initialize router
     let app = init_router(state)?;
