@@ -1,6 +1,6 @@
 [
   {
-    "name": "Ethereum Mainnet",
+    "name": "Ethereum",
     "chainId": 1,
     "shortName": "eth",
     "networkId": 1,
@@ -14,7 +14,7 @@
     ]
   },
   {
-    "name": "BNB Smart Chain Mainnet",
+    "name": "BNB Smart Chain",
     "chainId": 56,
     "shortName": "bnb",
     "networkId": 56,
@@ -56,7 +56,7 @@
     ]
   },
   {
-    "name": "Polygon Mainnet",
+    "name": "Polygon",
     "chainId": 137,
     "shortName": "pol",
     "networkId": 137,
