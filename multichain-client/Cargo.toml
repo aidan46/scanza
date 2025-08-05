@@ -1,0 +1,34 @@
+[package]
+authors.workspace = true
+edition.workspace = true
+name = "multichain-client"
+version = "0.1.0"
+
+[dependencies]
+alloy = { workspace = true, features = [
+  "reqwest",
+  "rpc",
+  "rpc-client",
+  "sol-types",
+  "transport-http",
+  "transports",
+] }
+alloy-chains = { workspace = true }
+anyhow = { workspace = true }
+foundry-block-explorers = { workspace = true }
+futures = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+dotenvy = { workspace = true }
+tokio = { version = "1.47.1", features = [
+  "macros",
+  "rt-multi-thread",
+], default-features = false }
+tracing-subscriber = { version = "0.3.19", features = [
+  "env-filter",
+  "fmt",
+  "std",
+], default-features = false }

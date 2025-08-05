@@ -2,7 +2,6 @@ use axum::{Json, Router, extract::State, routing::get};
 
 use crate::{
     AppState,
-    chains::Chains,
     routes::{
         balance::get_balance, tokens::get_tokens, transactions::get_transactions,
         wallet::get_wallet,
@@ -14,9 +13,26 @@ mod tokens;
 mod transactions;
 mod wallet;
 
+use serde::Serialize;
+
+#[derive(Serialize)]
+pub struct ChainInfo {
+    #[serde(rename = "shortName")]
+    pub short_name: String,
+    pub name: String,
+}
+
 /// GET /chains — Returns list of loaded chains
-pub async fn get_chains(State(state): State<AppState>) -> Json<Vec<Chains>> {
-    let chains = state.chains.values().map(|c| *c.name()).collect();
+pub async fn get_chains(State(state): State<AppState>) -> Json<Vec<ChainInfo>> {
+    let chains = state
+        .registry
+        .inner()
+        .iter()
+        .map(|(key, client)| ChainInfo {
+            short_name: key.to_string(),
+            name: client.name().to_string(),
+        })
+        .collect();
 
     Json(chains)
 }

@@ -1,0 +1,58 @@
+[
+  {
+    "name": "Ethereum Mainnet",
+    "chainId": 1,
+    "shortName": "eth",
+    "networkId": 1,
+    "nativeCurrency": {
+      "name": "Ether",
+      "symbol": "ETH",
+      "decimals": 18
+    },
+    "rpc": [
+      "https://eth.llamarpc.com"
+    ]
+  },
+  {
+    "name": "BNB Smart Chain Mainnet",
+    "chainId": 56,
+    "shortName": "bnb",
+    "networkId": 56,
+    "nativeCurrency": {
+      "name": "BNB Chain Native Token",
+      "symbol": "BNB",
+      "decimals": 18
+    },
+    "rpc": [
+      "https://binance.llamarpc.com"
+    ]
+  },
+  {
+    "name": "Arbitrum One",
+    "chainId": 42161,
+    "shortName": "arb1",
+    "networkId": 42161,
+    "nativeCurrency": {
+      "name": "Ether",
+      "symbol": "ETH",
+      "decimals": 18
+    },
+    "rpc": [
+      "https://arbitrum.therpc.io"
+    ]
+  },
+  {
+    "name": "Base",
+    "chainId": 8453,
+    "shortName": "base",
+    "networkId": 8453,
+    "nativeCurrency": {
+      "name": "Ether",
+      "symbol": "ETH",
+      "decimals": 18
+    },
+    "rpc": [
+      "https://base.llamarpc.com"
+    ]
+  }
+]

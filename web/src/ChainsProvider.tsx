@@ -1,7 +1,12 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
+interface ChainInfo {
+	name: string;
+	shortName: string;
+}
+
 interface ChainsContextType {
-	chains: string[];
+	chains: ChainInfo[];
 	loading: boolean;
 	error: string | null;
 }
@@ -19,7 +24,7 @@ export function ChainsProvider({
 	baseUrl: string;
 	children: React.ReactNode;
 }) {
-	const [chains, setChains] = useState<string[]>([]);
+	const [chains, setChains] = useState<ChainInfo[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
@@ -28,7 +33,7 @@ export function ChainsProvider({
 			try {
 				const res = await fetch(`${baseUrl}/chains`);
 				if (!res.ok) throw new Error(`Failed to load chains: ${res.status}`);
-				const chains: string[] = await res.json();
+				const chains: ChainInfo[] = await res.json();
 				setChains(chains);
 			} catch (err) {
 				setError(`${err}`);

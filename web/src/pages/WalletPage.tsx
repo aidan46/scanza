@@ -22,9 +22,8 @@ export default function WalletPage({ baseUrl }: WalletPageProps) {
 	const { address } = useParams<{ address: string }>();
 	const location = useLocation();
 	const { chains, loading, error } = useChains();
-
 	const [tab, setTab] = useState("overview");
-	const [chain, setChain] = useState("ethereum");
+	const [chain, setChain] = useState("arb1");
 
 	useEffect(() => {
 		if (location.hash === "#transactions") setTab("transactions");
@@ -70,11 +69,15 @@ export default function WalletPage({ baseUrl }: WalletPageProps) {
 							<SelectValue placeholder="Select chain" />
 						</SelectTrigger>
 						<SelectContent>
-							{chains.map((id) => (
-								<SelectItem key={id} value={id}>
-									{id.charAt(0).toUpperCase() + id.slice(1)}
-								</SelectItem>
-							))}
+							{chains.map((chain) => {
+								if (!chain || !chain.shortName) return null;
+
+								return (
+									<SelectItem key={chain.shortName} value={chain.shortName}>
+										{chain.name}
+									</SelectItem>
+								);
+							})}
 						</SelectContent>
 					</Select>
 				</div>

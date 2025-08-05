@@ -7,22 +7,17 @@ use axum::{
 };
 use tracing::info;
 
-use crate::{
-    AppState,
-    chains::Chains,
-    routes::{balance::fetch_balance, tokens::fetch_token_balances},
-    types::WalletSummary,
-};
+use crate::{AppState, types::WalletSummary};
 
 pub async fn get_wallet(
-    Path((chain, address)): Path<(Chains, Address)>,
+    Path((chain, address)): Path<(String, Address)>,
     State(state): State<AppState>,
 ) -> Response {
     info!("Fetching wallet summary for {address}");
 
-    match state.chains.get(&chain) {
-        Some(chain) => {
-            let native_balance = match fetch_balance(address, chain.client()).await {
+    match state.registry.get(&chain) {
+        Some(client) => {
+            let native_balance = match client.get_native_balance(address).await {
                 Ok(balance) => balance,
                 Err(err) => {
                     return (
@@ -36,7 +31,7 @@ pub async fn get_wallet(
                 }
             };
 
-            let tokens = fetch_token_balances(address, chain.client(), chain.tokens()).await;
+            let tokens = client.get_token_balances(address).await;
 
             let response = WalletSummary {
                 address,

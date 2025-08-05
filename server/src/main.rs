@@ -1,21 +1,16 @@
 #![warn(unused_crate_dependencies)]
-use std::{collections::HashMap, net::SocketAddr, sync::Arc};
+use std::{collections::HashMap, fs, net::SocketAddr, path::Path};
 
-use alloy_chains::Chain;
 use anyhow::Result;
 use axum::{Router, routing::get};
+use multichain_client::{ChainMetaData, EvmClientRegistry};
 use tokio::net::TcpListener;
 use tower_http::cors::{Any, CorsLayer};
-use tracing::{info, level_filters::LevelFilter};
+use tracing::{info, level_filters::LevelFilter, warn};
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
-use crate::{
-    chains::{ChainClient, Chains, Ethereum},
-    routes::routes,
-};
+use crate::routes::routes;
 
-mod chains;
-mod loader;
 mod routes;
 mod types;
 
@@ -23,19 +18,11 @@ async fn root() -> &'static str {
     "Welcome to Scanza"
 }
 
-fn init_app_state() -> Result<AppState> {
-    let mut chains: HashMap<Chains, Arc<dyn ChainClient>> = HashMap::new();
+fn init_app_state<P: AsRef<Path>>(chain_list: P) -> Result<AppState> {
+    let etherscan_api_key = dotenvy::var("ETHERSCAN_API_KEY")?;
+    let registry = create_registry(read_chains_from_json(chain_list)?, &etherscan_api_key)?;
 
-    // Ethereum
-    let eth = Ethereum::new(
-        Chain::mainnet(),
-        &dotenvy::var("ETHEREUM_RPC_URL")?,
-        &dotenvy::var("ETHERSCAN_API_KEY")?,
-        "tokens/eth.json",
-    )?;
-    chains.insert(Chains::Ethereum, Arc::new(eth));
-
-    Ok(AppState { chains })
+    Ok(AppState { registry })
 }
 
 fn init_tracing() -> Result<()> {
@@ -65,9 +52,35 @@ fn init_router(state: AppState) -> Result<Router> {
         .layer(cors))
 }
 
+fn read_chains_from_json<P: AsRef<Path>>(path: P) -> Result<Vec<ChainMetaData>> {
+    let data = fs::read_to_string(path)?;
+    Ok(serde_json::from_str(&data)?)
+}
+
+fn create_registry(
+    chains: Vec<ChainMetaData>,
+    etherscan_api_key: &str,
+) -> Result<EvmClientRegistry> {
+    let mut client_map = HashMap::new();
+    for chain in chains.iter() {
+        if let Ok(mut client) = chain.create_rpc_client(etherscan_api_key) {
+            info!("✅ Created client for {}", chain.name);
+            let path_str = format!("config/{}-tokens.json", chain.short_name);
+            let path = Path::new(&path_str);
+            if path.exists() {
+                client.add_tokens_from_file(path)?;
+                info!("✅ Added tokens for {}", chain.name);
+            }
+            client_map.insert(chain.short_name.clone(), client);
+        }
+    }
+
+    Ok(EvmClientRegistry::new(client_map))
+}
+
 #[derive(Clone)]
 pub struct AppState {
-    pub chains: HashMap<Chains, Arc<dyn ChainClient>>,
+    pub registry: EvmClientRegistry,
 }
 
 #[tokio::main]
@@ -79,7 +92,7 @@ async fn main() -> Result<()> {
     init_tracing()?;
 
     // initialize app state
-    let state = init_app_state()?;
+    let state = init_app_state("config/chains.json")?;
 
     // initialize router
     let app = init_router(state)?;

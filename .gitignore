@@ -9,3 +9,6 @@
 
 # DS_Store removal script
 remove-ds-store.sh
+
+# cargo target
+target
