@@ -32,7 +32,6 @@
           clang                 # Required for building native dependencies (e.g., bindgen)
           pkg-config            # Helps native libraries communicate their compile/link flags
           taplo                 # TOML formatter/linter
-          just                  # Task runner (for Justfile commands)
 
           nodejs                # Node.js (used for front-end development)
           nodePackages.pnpm     # pnpm package manager (used instead of npm/yarn)

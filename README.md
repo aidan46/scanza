@@ -11,7 +11,6 @@ It allows you to query a wallet's native ETH balance and token holdings.
 - 🧠 Local token metadata loading from disk
 - 💡 Modern TypeScript + React frontend built with [Vite](https://vitejs.dev/)
 - 🧪 Nix-based development environment
-- ⚙️ Zero-config task running via [Just](https://github.com/casey/just)
 
 ### API Endpoints
 
@@ -65,7 +64,7 @@ This project includes a fully configured Nix dev shell with:
 
 - Nightly Rust (`rust-toolchain.toml`)
 - `rust-overlay` for managing toolchains
-- `clang`, `pkg-config`, `taplo`, `just`, `nodejs`, `pre-commit` and `pnpm`
+- `clang`, `pkg-config`, `taplo`, `nodejs`, `pre-commit` and `pnpm`
 - macOS TLS linker support (via `darwin.apple_sdk.frameworks.Security`)
 
 ### Launch dev shell
