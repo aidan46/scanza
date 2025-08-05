@@ -3,27 +3,31 @@ repos:
     hooks:
       - id: cargo-fmt
         name: Cargo Format Check
-        entry: bash -c 'cd server && cargo fmt --all -- --check'
+        entry: cargo fmt --all -- --check
         language: system
         pass_filenames: false
+        types: [rust]
 
       - id: cargo-clippy
         name: Cargo Clippy Lint
-        entry: bash -c 'cd server && cargo clippy --all-targets --all-features -- -D warnings'
+        entry: cargo clippy --all-targets --all-features -- -D warnings
         language: system
         pass_filenames: false
+        types: [rust]
 
       - id: pnpm-fmt-check
         name: Frontend Format Check (pnpm)
         entry: bash -c 'cd web && pnpm run fmt-check'
         language: system
         pass_filenames: false
+        types: [ts, tsx]
 
       - id: pnpm-lint
         name: Frontend Lint (pnpm)
         entry: bash -c 'cd web && pnpm run lint'
         language: system
         pass_filenames: false
+        types: [ts, tsx]
 
       - id: taplo
         name: Taplo TOML Format Check
