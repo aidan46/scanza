@@ -142,38 +142,49 @@ impl EvmChainClient {
 
     /// Fetches transactions for the given address using Etherscan.
     ///
-    /// Over-fetches one extra to detect whether more pages exist.
+    /// Requests exactly `offset` transactions for the specified `page`.
+    /// If the returned list is full, performs a lightweight probe of the
+    /// next page to determine if more transactions exist.
     ///
-    /// Returns `(Vec<NormalTransaction>, has_more)`.
+    /// Returns `(transactions, has_more)`, where:
+    /// - `transactions` contains at most `offset` results for the given page
+    /// - `has_more` is `true` if another page of results is available
     pub async fn get_transactions(
         &self,
         address: Address,
         page: u64,
         offset: u64,
     ) -> Result<(Vec<NormalTransaction>, bool)> {
-        let overget_offset = offset + 1;
-
-        let params = TxListParams {
+        let base = TxListParams {
             start_block: 0,
             end_block: u64::MAX,
-            page,
-            offset: overget_offset,
             sort: Sort::Desc,
+            page,
+            offset,
         };
 
         let fetched = self
             .etherscan
-            .get_transactions(&address, Some(params))
+            .get_transactions(&address, Some(base))
             .await?;
-        let has_more = fetched.len() as u64 > offset;
 
-        let trimmed = if has_more {
-            fetched.into_iter().take(offset as usize).collect()
+        let has_more = if fetched.len() as u64 == offset {
+            // Probe the next page cheaply
+            let probe = TxListParams {
+                page: page + 1,
+                offset: 1,
+                ..base
+            };
+            let next = self
+                .etherscan
+                .get_transactions(&address, Some(probe))
+                .await?;
+            !next.is_empty()
         } else {
-            fetched
+            false
         };
 
-        Ok((trimmed, has_more))
+        Ok((fetched, has_more))
     }
 }
 
