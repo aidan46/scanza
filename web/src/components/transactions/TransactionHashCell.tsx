@@ -7,7 +7,7 @@ export function TransactionHashCell({ hash }: { hash: string }) {
       <CopyableText
         fullText={normalizeString(hash)}
         displayText={shortHash(hash)}
-        copyTooltipLabel="Copy Transaciton Hash"
+        copyTooltipLabel="Copy Transaction Hash"
       />
     </div>
   );
