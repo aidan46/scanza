@@ -6,6 +6,7 @@ use std::{
 
 use anyhow::Result;
 use axum::{Router, routing::get};
+use mongodb::Client as MongoClient;
 use multichain_client::{ChainMetaData, EvmClientRegistry};
 use tower_http::cors::{Any, CorsLayer};
 use tracing::{info, level_filters::LevelFilter};
@@ -13,12 +14,20 @@ use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberI
 
 use crate::{AppState, root, routes::routes};
 
-pub fn init_app_state<P: AsRef<Path>>(chain_list: P, token_folder: PathBuf) -> Result<AppState> {
+pub async fn init_app_state<P: AsRef<Path>>(
+    chain_list: P,
+    token_folder: PathBuf,
+) -> Result<AppState> {
+    // setup registry
     let etherscan_api_key = dotenvy::var("ETHERSCAN_API_KEY")?;
     let chains = read_chains_from_json(chain_list)?;
     let registry = create_registry(chains, token_folder, &etherscan_api_key)?;
 
-    Ok(AppState { registry })
+    // setup mongodb
+    let uri = dotenvy::var("MONGODB_URI")?;
+    let mongodb = MongoClient::with_uri_str(uri).await?;
+
+    Ok(AppState { registry, mongodb })
 }
 
 pub fn init_tracing() -> Result<()> {

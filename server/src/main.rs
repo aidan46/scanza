@@ -3,6 +3,7 @@ use std::net::SocketAddr;
 
 use anyhow::Result;
 use clap::Parser;
+use mongodb::Client as MongoClient;
 use multichain_client::EvmClientRegistry;
 use tokio::net::TcpListener;
 use tracing::info;
@@ -23,6 +24,7 @@ async fn root() -> &'static str {
 #[derive(Clone)]
 pub struct AppState {
     pub registry: EvmClientRegistry,
+    pub mongodb: MongoClient,
 }
 
 #[tokio::main]
@@ -36,7 +38,7 @@ async fn main() -> Result<()> {
     let cli = Cli::parse();
 
     // initialize app state
-    let state = init_app_state(cli.chains, cli.token_folder)?;
+    let state = init_app_state(cli.chains, cli.token_folder).await?;
 
     // initialize router
     let app = init_router(state)?;
